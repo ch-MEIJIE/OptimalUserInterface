@@ -45,6 +45,8 @@ videoSquareSize = [12.8,7.2]
 videoSquarePos = [0,0,19]
 viz.setMultiSample(4)
 
+pic = viz.addTexture('texture.jpg')
+
 
 viz.window.setFullscreenMonitor(1)
 viz.go(viz.FULLSCREEN)
@@ -58,7 +60,10 @@ attitudeDirector.setAxisAngle([0,1,0, 90])
 attitudeDirector.setScale([0.2,0.2,0.2])
 attitudeDirector.visible(viz.ON)
 
+quadBack = viz.addTexQuad(size=videoSquareSize)
+quadBack.setPosition(videoSquarePos)
 
+quadBack.texture(pic) 
 
 
 # Gird on the video:
@@ -93,12 +98,10 @@ fbsquares = {}
 for i in range(len(position)):
 	if i<=11 and i!=10:
 		squares['square'+str(i)] = vizshape.addBox(size=(size,size,0.01), splitFaces=False, pos=position[str(i)])
-		fbsquares['fbsquare'+str(i)] = vizshape.addQuad(size=(size+0.1,size+0.1), pos = position[str(i)],color = (0,0,0))
+		#fbsquares['fbsquare'+str(i)] = vizshape.addQuad(size=(size+0.1,size+0.1), pos = position[str(i)],color = (0,0,0))
 	else:
 		squares['square'+str(i)] = vizshape.addBox(size=(keepsize,keepsize,0.01), splitFaces=False, pos=position[str(i)])
-		fbsquares['fbsquare'+str(i)] = vizshape.addQuad(size=(keepsize+0.1,keepsize+0.1), pos = position[str(i)],color = (1,0,0))
-			
-
+		#fbsquares['fbsquare'+str(i)] = vizshape.addQuad(size=(keepsize+0.1,keepsize+0.1), pos = position[str(i)],color = (1,1,1 ))
 
 texts = {}
 #Set text showing on the squares
@@ -114,8 +117,6 @@ readyAnswer = vizinput.ask("If ready, press 'Yes'")
 
 # define a task sequence, stimulate action will execute until cue finish
 triggersignal = viztask.Signal()
-print len(position)
-print len(squares)
 def stistage():
 	for i in range(len(position)):
 		if i<=11 and i!=10:

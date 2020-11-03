@@ -24,6 +24,7 @@ class cueAction(viz.ActionClass):
 	def update(self,elapsed,object):
 		self.timeElapsed += elapsed
 		self.counter += 1
+		object.alpha(1)
 		
 		if self.cueDuration>0.0 and self.timeElapsed>self.cueDuration:
 			# The end condition of square
