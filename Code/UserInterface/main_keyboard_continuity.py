@@ -1,5 +1,5 @@
-﻿from stimulate import cueInitial, stiInitial,onlinecueInitial,stiInitialalpha
-
+﻿from stimulate import cueInitial, stiInitial,onlinecueInitial,stiInitialalpha, ContinuousFlickerInitial, ContinuousFlickerInitial_trigger
+from stimulate import timeCountActionInitial
 import vizshape
 import vizact
 import viz
@@ -16,8 +16,6 @@ import numpy
 
 #from telloVideo import telloVideo
 #from tello import Tello
-
-
 
 choice = vizinput.choose('Select Experiment Mode',['Online','Offline','Simulate Online'])
 
@@ -93,6 +91,7 @@ viz.vertex(0,-3.6,18.9)
 gridLines = viz.endLayer()
 
 
+#Draw flicker squares
 squares = {}
 fbsquares = {}
 for i in range(len(position)):
@@ -116,7 +115,6 @@ for i in range(len(position)):
 readyAnswer = vizinput.ask("If ready, press 'Yes'")
 
 # define a task sequence, stimulate action will execute until cue finish
-triggersignal = viztask.Signal()
 def stistage():
 	for i in range(len(position)):
 		if i<=11 and i!=10:
@@ -124,6 +122,18 @@ def stistage():
 		else:
 			squares['square'+str(i)].addAction(stiInitial(stimulationLength,frequence[10],phase[10],framerate))
 	yield None
+
+# define a continuous flicker action for online stimulate
+def onlineStiStage():
+	for i in range(len(position)):
+		if i<=11 and i!=10:
+			squares['square'+str(i)].addAction(ContinuousFlickerInitial(frequence[i],phase[i],framerate))
+		else:
+			squares['square'+str(i)].addAction(ContinuousFlickerInitial_trigger(frequence[10],phase[10],framerate))
+			#TODO: Bug appears when number of flickers more than 12
+	yield None
+
+# 
 	
 def triggerWrite(msg):
 	pass
@@ -139,57 +149,23 @@ if choice == 1:
 				#myserial.serialWrite((i+1))
 				triggerWrite(i)
 				yield stistage()
-				yield viztask.addAction(squares['square'+str(1)],shortcue)
-				triggerWrite(i)
-				yield stistage()
-				yield viztask.addAction(squares['square'+str(1)],shortcue)
-				triggerWrite(i)
-				yield stistage()
-				yield viztask.addAction(squares['square'+str(1)],shortcue)
-				triggerWrite(i)
-				yield stistage()
-				yield viztask.addAction(squares['square'+str(1)],shortcue)
-				triggerWrite(i)
-				yield stistage()
 	viztask.schedule(mytask())
 	
 elif choice == 0:
 	def mytask():
-		counter = 0
-		while True:
-			counter+=1
-			cue = onlinecueInitial(0.01)
-
-			#serial.serialWrite(counter)
-			yield viztask.addAction(squares['square'+str(1)],cue)
-			yield stistage()
-			if counter > 250:
-				counter = 0
+		yield onlineStiStage()
 	viztask.schedule(mytask())
+
 	 
 elif choice == 2: 
 	def mytask():
-		triggerSeries = [0,1,2,3,4,5,6,7,8,9,10,11,1,3,5,7,9,11,2,4,6,8,10]
+		yield onlineStiStage()
+		triggerSeries = [0,1,2,3,4,5,6,7,8,9,10,11,1,3,5,7,9,11,0,2,4,6,8,10]
 		for triggernum in triggerSeries:
 			counter = 0
 			currentpos = position[str(triggernum)]
 			trigger = vizshape.addSphere(radius=0.15,slices=20,stacks=20,axis=vizshape.AXIS_Y, pos = [currentpos[0],currentpos[1]-0.9,currentpos[2]])
 			trigger.color(viz.RED)
-			while True:
-				counter+=1
-				cue = onlinecueInitial(0.01)
-
-				#serial.serialWrite(counter)
-				yield viztask.addAction(squares['square'+str(1)],cue)
-				triggerWrite(i)
-				yield stistage()
-				if counter >= 10:
-					break
+			yield viztask.addAction(trigger,timeCountActionInitial(triggerNum=triggernum,timeLength=10))
 			trigger.remove()
 	viztask.schedule(mytask())
-
-	
-
-'''
-	Necessary test examples are saved below
-'''
